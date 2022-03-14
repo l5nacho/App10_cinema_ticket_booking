@@ -2,10 +2,10 @@ class User:
     def _init__(self, name):
         self.name = name
 
-    def buy_seat(self):
+    def buy_seat(self, seat):
         pass
 
-    def use_card(self):
+    def use_card(self, card):
         pass
 
 class Seat:
@@ -31,7 +31,7 @@ class Card:
     def validate(self):
         pass
 
-class Ticket():
+class Ticket:
     def __init__(self, id, user, price, seat):
         self.id = id
         self.user = user
