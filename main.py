@@ -1,5 +1,4 @@
 import sqlite3
-import pandas as pd
 
 con = sqlite3.connect('data.db')
 cur = con.cursor()
@@ -8,14 +7,17 @@ class User:
     def __init__(self, name):
         self.name = name
 
-    def buy_seat(self, seat):
-        pass
+    def buy_seat(self, seat, card):
+        if seat.is_free() and card.validate():
+            price = cur.execute(f"select price from cinema where seat_id = '{seat.seat}'").fetchone()[0]
+            cur_balance = cur.execute(f"select balance from cards where number = {card.number}").fetchone()[0]
+            print(f'The price of the ticket is {price} and the current balance is {cur_balance}')
+            cur.execute(f"update cards set balance = {cur_balance} - {price} where number = {card.number};")
+            cur.execute('commit')
 
-    def use_card(self, card, prize):
-        if card.validate():
-            current_balance = cur.execute("select balance from cards where number = self.card.number")
-
-
+            seat.occupy()
+        else:
+            print('Please try again')
 
 class Seat:
 
@@ -25,18 +27,17 @@ class Seat:
     def is_free(self):
         seat_f = cur.execute(f"select taken from cinema where seat_id = '{self.seat}'").fetchone()[0]
         print(seat_f)
-        if seat_f == '1':
-            return False
-        else:
+        if seat_f == '0':
             return True
+        else:
+            print('Seat is occupied')
+            return False
 
     def occupy(self):
-        if self.is_free():
-            cur.execute(f"update cinema set taken = 1 where seat_id = '{self.seat}'")
-            cur.execute('commit')
-            print(f'seat {self.seat} changed from free to occupied')
-        else:
-            print('Seat is currently occupied')
+        cur.execute(f"update cinema set taken = 1 where seat_id = '{self.seat}'")
+        cur.execute('commit')
+        print(f'seat {self.seat} changed from free to occupied')
+
 
 
 class Card:
@@ -58,6 +59,7 @@ class Card:
         if len(valid) > 0:
             return True
         else:
+            print('Card is not valid')
             return False
 
 
@@ -71,9 +73,20 @@ class Ticket:
     def to_pdf(self, path):
         pass
 
-user = User(name='Francisco Donaire')
-seat = Seat(seat='B3')
-seat2 = Seat(seat='B2')
-card = Card(tipo='Master Card', number=23456789, cvc=234, holder='Marry Smith')
-seat.occupy()
-seat2.occupy()
+# user = User(name='Francisco Donaire')
+# seat = Seat(seat='A1')
+# seat2 = Seat(seat='A2')
+# card = Card(tipo='Master Card', number=23456789, cvc=234, holder='Marry Smith')
+# user.buy_seat(seat=seat)
+# user.use_card(card=card, seat=seat)
+
+name = input('Enter your name: ')
+user = User(name=name)
+seat = input('Enter your seat: ')
+seat = Seat(seat=seat)
+card_type = input('Enter your card type:')
+card_number = int(input('Enter your card number: '))
+card_cvc = int(input('Enter your card cvc: '))
+card_holder = input('Enter your card holder: ')
+card = Card(tipo=card_type, number=card_number, cvc=card_cvc, holder=card_holder)
+user.buy_seat(seat=seat, card=card)
