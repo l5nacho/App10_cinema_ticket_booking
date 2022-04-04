@@ -13,7 +13,7 @@ class User:
             cur_balance = cur.execute(f"select balance from cards where number = {card.number}").fetchone()[0]
             print(f'The price of the ticket is {price} and the current balance is {cur_balance}')
             cur.execute(f"update cards set balance = {cur_balance} - {price} where number = {card.number};")
-            cur.execute('commit')
+            con.commit()
 
             seat.occupy()
         else:
@@ -35,7 +35,7 @@ class Seat:
 
     def occupy(self):
         cur.execute(f"update cinema set taken = 1 where seat_id = '{self.seat}'")
-        cur.execute('commit')
+        con.commit()
         print(f'seat {self.seat} changed from free to occupied')
 
 
@@ -90,3 +90,4 @@ card_cvc = int(input('Enter your card cvc: '))
 card_holder = input('Enter your card holder: ')
 card = Card(tipo=card_type, number=card_number, cvc=card_cvc, holder=card_holder)
 user.buy_seat(seat=seat, card=card)
+con.close()
